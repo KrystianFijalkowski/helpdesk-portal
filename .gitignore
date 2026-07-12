@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node / React
+node_modules/
+dist/
+build/
+
+# Baza danych (lokalna, nie wrzucamy do repo)
+*.db
+*.sqlite3
+
+# Sekrety i konfiguracja lokalna
+.env
+
+# System / edytor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
