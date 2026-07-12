@@ -1,9 +1,19 @@
-from fastapi import FastAPI
+from typing import Optional
+
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.orm import Session
+
+import models
+import schemas
+from database import Base, engine, get_db
+
+# Tworzy tabele w bazie przy starcie, jeśli jeszcze nie istnieją
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="IT Helpdesk Portal API",
     description="Backend systemu obsługi zgłoszeń IT",
-    version="0.1.0",
+    version="0.2.0",
 )
 
 
@@ -14,6 +24,55 @@ def read_root():
 
 @app.get("/api/health")
 def health_check():
-    # Endpoint "zdrowia" — standard w każdym API; monitoring pyta go,
-    # czy serwis żyje
     return {"status": "ok"}
+
+
+@app.post("/api/tickets", response_model=schemas.TicketOut, status_code=201)
+def create_ticket(data: schemas.TicketCreate, db: Session = Depends(get_db)):
+    """Nowe zgłoszenie — wypełnia pracownik."""
+    ticket = models.Ticket(**data.model_dump())
+    db.add(ticket)
+    db.commit()
+    db.refresh(ticket)
+    return ticket
+
+
+@app.get("/api/tickets", response_model=list[schemas.TicketOut])
+def list_tickets(
+    status: Optional[schemas.Status] = None,
+    db: Session = Depends(get_db),
+):
+    """Lista zgłoszeń, opcjonalnie filtrowana po statusie (?status=new)."""
+    query = db.query(models.Ticket).order_by(models.Ticket.created_at.desc())
+    if status is not None:
+        query = query.filter(models.Ticket.status == status)
+    return query.all()
+
+
+@app.get("/api/tickets/{ticket_id}", response_model=schemas.TicketOut)
+def get_ticket(ticket_id: int, db: Session = Depends(get_db)):
+    """Szczegóły jednego zgłoszenia."""
+    ticket = db.get(models.Ticket, ticket_id)
+    if ticket is None:
+        raise HTTPException(status_code=404, detail="Zgłoszenie nie istnieje")
+    return ticket
+
+
+@app.patch("/api/tickets/{ticket_id}", response_model=schemas.TicketOut)
+def update_ticket(
+    ticket_id: int,
+    data: schemas.TicketUpdate,
+    db: Session = Depends(get_db),
+):
+    """Zmiana statusu lub priorytetu — robi to technik."""
+    ticket = db.get(models.Ticket, ticket_id)
+    if ticket is None:
+        raise HTTPException(status_code=404, detail="Zgłoszenie nie istnieje")
+
+    # exclude_unset: aktualizujemy tylko pola, które klient faktycznie przysłał
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(ticket, field, value)
+
+    db.commit()
+    db.refresh(ticket)
+    return ticket
