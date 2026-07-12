@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -6,6 +7,7 @@ from sqlalchemy.orm import Session
 import models
 import schemas
 from database import Base, engine, get_db
+from monitoring import POLL_INTERVAL, start_poller
 
 # Tworzy tabele w bazie przy starcie, jeśli jeszcze nie istnieją
 Base.metadata.create_all(bind=engine)
@@ -13,8 +15,13 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="IT Helpdesk Portal API",
     description="Backend systemu obsługi zgłoszeń IT",
-    version="0.4.0",
+    version="0.5.0",
 )
+
+
+@app.on_event("startup")
+def startup():
+    start_poller()
 
 
 @app.get("/")
@@ -133,6 +140,41 @@ def update_asset(
     db.commit()
     db.refresh(asset)
     return asset
+
+
+# --- Monitoring ---
+
+
+@app.get("/api/monitoring/status", response_model=schemas.MonitoringStatus)
+def monitoring_status(db: Session = Depends(get_db)):
+    """Aktualny stan serwera: online, jeśli ostatnia próbka jest świeża."""
+    sample = (
+        db.query(models.MetricSample)
+        .order_by(models.MetricSample.created_at.desc())
+        .first()
+    )
+    online = False
+    if sample is not None:
+        age = (datetime.utcnow() - sample.created_at).total_seconds()
+        # tolerancja: dwa nieudane odpytania z rzędu = offline
+        online = age < POLL_INTERVAL * 2 + 15
+    return {
+        "online": online,
+        "hostname": sample.hostname if sample else None,
+        "sample": sample,
+    }
+
+
+@app.get("/api/monitoring/history", response_model=list[schemas.MetricSampleOut])
+def monitoring_history(hours: int = 3, db: Session = Depends(get_db)):
+    """Historia metryk z ostatnich N godzin (do wykresów)."""
+    cutoff = datetime.utcnow() - timedelta(hours=hours)
+    return (
+        db.query(models.MetricSample)
+        .filter(models.MetricSample.created_at >= cutoff)
+        .order_by(models.MetricSample.created_at.asc())
+        .all()
+    )
 
 
 @app.patch("/api/tickets/{ticket_id}", response_model=schemas.TicketOut)

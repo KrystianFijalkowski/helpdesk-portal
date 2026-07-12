@@ -1,7 +1,7 @@
 const navItems = [
   { key: 'tickets', label: 'Zgłoszenia', icon: '🎫' },
   { key: 'assets', label: 'Zasoby IT', icon: '💻' },
-  { key: 'monitoring', label: 'Monitoring', icon: '📡', soon: true },
+  { key: 'monitoring', label: 'Monitoring', icon: '📡' },
   { key: 'reports', label: 'Raporty', icon: '📊', soon: true },
 ]
 

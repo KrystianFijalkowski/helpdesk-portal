@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -57,3 +57,17 @@ class Asset(Base):
     notes = Column(Text, nullable=False, default="")
     created_at = Column(DateTime, default=utc_now)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
+
+
+class MetricSample(Base):
+    """Jedna próbka metryk z monitorowanego serwera (co ~30 s)."""
+
+    __tablename__ = "metric_samples"
+
+    id = Column(Integer, primary_key=True, index=True)
+    hostname = Column(String(100), nullable=False)
+    cpu_percent = Column(Float, nullable=False)
+    ram_percent = Column(Float, nullable=False)
+    disk_percent = Column(Float, nullable=False)
+    uptime_seconds = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=utc_now, index=True)

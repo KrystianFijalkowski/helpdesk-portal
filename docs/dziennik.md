@@ -129,3 +129,26 @@ Szczegóły krok po kroku: [vps-setup.md](vps-setup.md)
 - Firewall działa na dwóch warstwach: w systemie (iptables) i w chmurze (Security List/NSG) — obie muszą przepuścić ruch
 - fail2ban czyta logi i automatycznie banuje IP atakujących
 - Po aktualizacji jądra system prosi o reboot (`/var/run/reboot-required`) — a konfiguracja musi przetrwać restart (netfilter-persistent)
+
+---
+
+## 2026-07-12 — Etap 5: monitoring na żywo ✅
+
+**Architektura (jak w prawdziwych systemach typu Zabbix):**
+1. **Agent na VPS** (`agent/agent.py`) — FastAPI + psutil, endpoint `/metrics` (CPU, RAM, dysk, uptime), chroniony kluczem API w nagłówku `X-API-Key`; działa jako usługa **systemd** (`Restart=always`, wstaje po reboocie)
+2. **Reguła ingress w Oracle NSG** — port 8000/TCP otwarty w chmurowej warstwie firewalla (systemowa była otwarta wcześniej)
+3. **Poller w backendzie** (`backend/monitoring.py`) — wątek w tle odpytuje agenta co 30 s i zapisuje próbki do bazy (trzymamy 24 h historii)
+4. **Frontend** — zakładka Monitoring: status ONLINE/OFFLINE, kafelki CPU/RAM/dysk/uptime, wykres liniowy z historią (SVG, tooltip, zakresy 1/3/12/24 h)
+
+**Bezpieczeństwo:**
+- Klucz API generowany kryptograficznie; na serwerze żyje w konfiguracji systemd, lokalnie w `backend/.env` — **poza repozytorium** (w repo tylko `.env.example`)
+- Endpoint bez klucza zwraca 401 — przetestowane
+
+**Problemy i rozwiązania:**
+- Poller nie zbierał danych: `load_dotenv()` nie znajdował `.env`, bo serwer startuje z innego folderu → jawna ścieżka `Path(__file__).parent / ".env"` (ta sama lekcja co przy bazie SQLite!)
+
+**Czego się nauczyłem:**
+- systemd: własna usługa (`/etc/systemd/system/*.service`), `daemon-reload`, `enable --now`, `is-active`
+- Wzorzec agent → poller → baza → dashboard, czyli jak działa monitoring infrastruktury
+- Wątek-daemon w Pythonie (`threading.Thread(daemon=True)`) do pracy w tle obok API
+- Wykres SVG od zera: skalowanie danych do współrzędnych, siatka, legenda, tooltip; paleta sprawdzona walidatorem dostępności (rozróżnialność dla daltonistów)

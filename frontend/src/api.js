@@ -46,3 +46,13 @@ export function createAsset(data) {
 export function updateAsset(id, data) {
   return request(`/api/assets/${id}`, { method: 'PATCH', body: JSON.stringify(data) })
 }
+
+// --- Monitoring ---
+
+export function fetchMonitoringStatus() {
+  return request('/api/monitoring/status')
+}
+
+export function fetchMonitoringHistory(hours) {
+  return request(`/api/monitoring/history?hours=${hours}`)
+}

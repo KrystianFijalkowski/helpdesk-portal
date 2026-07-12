@@ -140,3 +140,24 @@ class AssetOut(BaseModel):
         if self.warranty_until is None:
             return None
         return (self.warranty_until - date.today()).days
+
+
+# --- Monitoring ---
+
+
+class MetricSampleOut(BaseModel):
+    cpu_percent: float
+    ram_percent: float
+    disk_percent: float
+    uptime_seconds: int
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class MonitoringStatus(BaseModel):
+    """Aktualny stan monitorowanego serwera."""
+
+    online: bool
+    hostname: Optional[str]
+    sample: Optional[MetricSampleOut]
