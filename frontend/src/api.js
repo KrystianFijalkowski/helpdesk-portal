@@ -1,0 +1,33 @@
+// Warstwa komunikacji z backendem — wszystkie fetch'e w jednym miejscu
+
+async function request(url, options = {}) {
+  const res = await fetch(url, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  })
+  if (!res.ok) {
+    throw new Error(`Błąd API: ${res.status}`)
+  }
+  return res.json()
+}
+
+export function fetchTickets(status) {
+  const query = status ? `?status=${status}` : ''
+  return request(`/api/tickets${query}`)
+}
+
+export function fetchTicket(id) {
+  return request(`/api/tickets/${id}`)
+}
+
+export function createTicket(data) {
+  return request('/api/tickets', { method: 'POST', body: JSON.stringify(data) })
+}
+
+export function updateTicket(id, data) {
+  return request(`/api/tickets/${id}`, { method: 'PATCH', body: JSON.stringify(data) })
+}
+
+export function addComment(id, data) {
+  return request(`/api/tickets/${id}/comments`, { method: 'POST', body: JSON.stringify(data) })
+}

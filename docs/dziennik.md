@@ -73,3 +73,19 @@ Dokumentuję tu na bieżąco postępy prac, decyzje techniczne i rzeczy, któryc
 - `cascade="all, delete-orphan"` — usunięcie ticketu automatycznie kasuje jego komentarze
 - `@computed_field` w Pydantic: pola wyliczane przy każdej odpowiedzi API, których nie ma w bazie — idealne na SLA
 - SLA (Service Level Agreement) = umowny maksymalny czas reakcji/rozwiązania zgłoszenia — kluczowe pojęcie w pracy helpdesku
+
+---
+
+## 2026-07-12 — Etap 2: frontend React + Tailwind ✅
+
+**Co zrobiłem:**
+- Zbudowałem frontend w React (Vite) + Tailwind CSS, wg wytycznych skilla ui-styling (tokeny designu, spójna paleta, mobile-first)
+- Wygląd: czcionka Plus Jakarta Sans (miękka, zaokrąglona), granatowy sidebar, karty z akcentem koloru wg priorytetu
+- Widoki: lista zgłoszeń (statystyki, filtry po statusie, badge SLA/priorytet/status), formularz nowego zgłoszenia, szczegóły z komentarzami i zmianą statusu
+- Proxy Vite: żądania `/api/*` z frontu (port 5174) lecą do backendu FastAPI (port 8000)
+
+**Czego się nauczyłem:**
+- Komponent React = funkcja zwracająca HTML (JSX); propsy = argumenty komponentu
+- `useState` trzyma stan (np. listę ticketów), `useEffect` odpala kod przy starcie/zmianie — tu: pobieranie danych z API
+- Tailwind CSS: stylowanie klasami narzędziowymi (`rounded-2xl`, `shadow-sm`), własne tokeny w `@theme`
+- Proxy dev-serwera pozwala frontendowi i backendowi udawać jedną aplikację (bez CORS)

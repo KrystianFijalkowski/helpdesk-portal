@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+/* Tokeny designu (wg skilla ui-styling): jedna czcionka, spójna paleta.
+   Plus Jakarta Sans — miękkie, zaokrąglone litery, profesjonalny charakter */
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Kolor marki: spokojny indygo-niebieski */
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+
+  /* Tło aplikacji: ciepła, jasna szarość zamiast czystej bieli */
+  --color-surface: #f6f7f9;
+
+  /* Sidebar: głęboki granat */
+  --color-ink-800: #1e2438;
+  --color-ink-900: #171c2e;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-surface);
+  -webkit-font-smoothing: antialiased;
+}
