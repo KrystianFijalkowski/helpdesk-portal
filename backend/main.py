@@ -13,7 +13,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="IT Helpdesk Portal API",
     description="Backend systemu obsługi zgłoszeń IT",
-    version="0.3.0",
+    version="0.4.0",
 )
 
 
@@ -78,6 +78,61 @@ def add_comment(
     db.commit()
     db.refresh(comment)
     return comment
+
+
+# --- Zasoby IT (CMDB) ---
+
+
+@app.post("/api/assets", response_model=schemas.AssetOut, status_code=201)
+def create_asset(data: schemas.AssetCreate, db: Session = Depends(get_db)):
+    """Dodanie zasobu do ewidencji."""
+    asset = models.Asset(**data.model_dump())
+    db.add(asset)
+    db.commit()
+    db.refresh(asset)
+    return asset
+
+
+@app.get("/api/assets", response_model=list[schemas.AssetOut])
+def list_assets(
+    status: Optional[schemas.AssetStatus] = None,
+    asset_type: Optional[schemas.AssetType] = None,
+    db: Session = Depends(get_db),
+):
+    """Ewidencja zasobów, opcjonalnie filtrowana po statusie lub typie."""
+    query = db.query(models.Asset).order_by(models.Asset.name)
+    if status is not None:
+        query = query.filter(models.Asset.status == status)
+    if asset_type is not None:
+        query = query.filter(models.Asset.asset_type == asset_type)
+    return query.all()
+
+
+@app.get("/api/assets/{asset_id}", response_model=schemas.AssetOut)
+def get_asset(asset_id: int, db: Session = Depends(get_db)):
+    asset = db.get(models.Asset, asset_id)
+    if asset is None:
+        raise HTTPException(status_code=404, detail="Zasób nie istnieje")
+    return asset
+
+
+@app.patch("/api/assets/{asset_id}", response_model=schemas.AssetOut)
+def update_asset(
+    asset_id: int,
+    data: schemas.AssetUpdate,
+    db: Session = Depends(get_db),
+):
+    """Zmiana przypisania, statusu, gwarancji lub notatek."""
+    asset = db.get(models.Asset, asset_id)
+    if asset is None:
+        raise HTTPException(status_code=404, detail="Zasób nie istnieje")
+
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(asset, field, value)
+
+    db.commit()
+    db.refresh(asset)
+    return asset
 
 
 @app.patch("/api/tickets/{ticket_id}", response_model=schemas.TicketOut)

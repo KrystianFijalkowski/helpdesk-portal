@@ -22,6 +22,33 @@ export const CATEGORY = {
   other: { label: 'Inne', icon: '📌' },
 }
 
+export const ASSET_TYPE = {
+  laptop: { label: 'Laptop', icon: '💻' },
+  desktop: { label: 'Komputer', icon: '🖥️' },
+  monitor: { label: 'Monitor', icon: '🖵' },
+  printer: { label: 'Drukarka', icon: '🖨️' },
+  phone: { label: 'Telefon', icon: '📱' },
+  network_device: { label: 'Urządzenie sieciowe', icon: '📡' },
+  license: { label: 'Licencja', icon: '📜' },
+  other: { label: 'Inne', icon: '📦' },
+}
+
+export const ASSET_STATUS = {
+  in_use: { label: 'W użyciu', badge: 'bg-emerald-100 text-emerald-700' },
+  in_storage: { label: 'Magazyn', badge: 'bg-slate-100 text-slate-600' },
+  repair: { label: 'Serwis', badge: 'bg-amber-100 text-amber-700' },
+  retired: { label: 'Wycofany', badge: 'bg-slate-200 text-slate-500' },
+}
+
+export function formatDay(isoDate) {
+  if (!isoDate) return '—'
+  return new Date(isoDate).toLocaleDateString('pl-PL', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
 export function formatDate(iso) {
   return new Date(iso).toLocaleString('pl-PL', {
     day: 'numeric',

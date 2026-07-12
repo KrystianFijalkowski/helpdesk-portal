@@ -89,3 +89,23 @@ Dokumentuję tu na bieżąco postępy prac, decyzje techniczne i rzeczy, któryc
 - `useState` trzyma stan (np. listę ticketów), `useEffect` odpala kod przy starcie/zmianie — tu: pobieranie danych z API
 - Tailwind CSS: stylowanie klasami narzędziowymi (`rounded-2xl`, `shadow-sm`), własne tokeny w `@theme`
 - Proxy dev-serwera pozwala frontendowi i backendowi udawać jedną aplikację (bez CORS)
+
+---
+
+## 2026-07-12 — Etap 3: zasoby IT (CMDB) ✅
+
+**Co zrobiłem:**
+- Backend: tabela `assets` (nazwa, typ, nr seryjny, przypisanie do pracownika, status, data zakupu, gwarancja, notatki) + endpointy CRUD z filtrami
+- Pole wyliczane `warranty_days_left` — ile dni gwarancji zostało (ujemne = wygasła)
+- Frontend: nowa zakładka "Zasoby IT" — sidebar stał się prawdziwą nawigacją (stan `section` w App)
+- Ewidencja jako tabela: kolumny zasób/nr seryjny/przypisanie/gwarancja/status, alerty gwarancyjne (czerwone "wygasła", bursztynowe "≤30 dni")
+- Szczegóły zasobu: zmiana statusu (magazyn → w użyciu → serwis → wycofany), edycja przypisania i notatek
+- Refaktoryzacja: widoki przeniesione do `pages/`, wspólne komponenty (StatCard, FilterChip) do `components/ui.jsx`
+
+**Problemy i rozwiązania:**
+- Auto-reload uvicorna dalej zawodzi na Windows+OneDrive → zabiłem proces na porcie 8000 (`Get-NetTCPConnection -LocalPort 8000` + `Stop-Process`) i wystartowałem serwer na nowo — przydatna sztuczka helpdeskowa
+
+**Czego się nauczyłem:**
+- CMDB (Configuration Management Database) = ewidencja zasobów IT z relacjami — kluczowe narzędzie działu IT
+- Refaktoryzacja bez zmiany zachowania: podział rosnącego kodu na `pages/` i współdzielone `components/`
+- Tabela HTML z klikalnymi wierszami jako wzorzec dla danych ewidencyjnych (karty lepsze dla ticketów, tabela dla inwentarza)

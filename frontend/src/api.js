@@ -31,3 +31,18 @@ export function updateTicket(id, data) {
 export function addComment(id, data) {
   return request(`/api/tickets/${id}/comments`, { method: 'POST', body: JSON.stringify(data) })
 }
+
+// --- Zasoby IT (CMDB) ---
+
+export function fetchAssets(status) {
+  const query = status ? `?status=${status}` : ''
+  return request(`/api/assets${query}`)
+}
+
+export function createAsset(data) {
+  return request('/api/assets', { method: 'POST', body: JSON.stringify(data) })
+}
+
+export function updateAsset(id, data) {
+  return request(`/api/assets/${id}`, { method: 'PATCH', body: JSON.stringify(data) })
+}

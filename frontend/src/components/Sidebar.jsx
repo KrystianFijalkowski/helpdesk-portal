@@ -1,11 +1,11 @@
 const navItems = [
-  { key: 'tickets', label: 'Zgłoszenia', icon: '🎫', active: true },
-  { key: 'assets', label: 'Zasoby IT', icon: '💻', soon: true },
+  { key: 'tickets', label: 'Zgłoszenia', icon: '🎫' },
+  { key: 'assets', label: 'Zasoby IT', icon: '💻' },
   { key: 'monitoring', label: 'Monitoring', icon: '📡', soon: true },
   { key: 'reports', label: 'Raporty', icon: '📊', soon: true },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ section, onNavigate }) {
   return (
     <aside className="flex w-60 shrink-0 flex-col bg-ink-900 text-slate-300">
       <div className="flex items-center gap-3 px-5 py-6">
@@ -20,12 +20,14 @@ export default function Sidebar() {
 
       <nav className="mt-2 flex flex-col gap-1 px-3">
         {navItems.map((item) => (
-          <div
+          <button
             key={item.key}
+            disabled={item.soon}
+            onClick={() => onNavigate(item.key)}
             className={
-              item.active
+              section === item.key
                 ? 'flex items-center gap-3 rounded-xl bg-ink-800 px-3 py-2.5 text-sm font-semibold text-white'
-                : 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-400'
+                : 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-400 transition hover:bg-ink-800/50 hover:text-slate-200 disabled:cursor-default disabled:hover:bg-transparent disabled:hover:text-slate-400'
             }
           >
             <span>{item.icon}</span>
@@ -35,7 +37,7 @@ export default function Sidebar() {
                 wkrótce
               </span>
             )}
-          </div>
+          </button>
         ))}
       </nav>
 

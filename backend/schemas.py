@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, computed_field
@@ -85,3 +85,58 @@ class TicketDetail(TicketOut):
     """Ticket ze szczegółami — razem z komentarzami."""
 
     comments: list[CommentOut] = []
+
+
+# --- Zasoby IT (CMDB) ---
+
+AssetType = Literal[
+    "laptop", "desktop", "monitor", "printer", "phone",
+    "network_device", "license", "other",
+]
+AssetStatus = Literal["in_use", "in_storage", "repair", "retired"]
+
+
+class AssetCreate(BaseModel):
+    """Nowy zasób w ewidencji."""
+
+    name: str = Field(min_length=2, max_length=200)
+    asset_type: AssetType
+    serial_number: str = Field(min_length=1, max_length=100)
+    assigned_to: Optional[str] = None
+    status: AssetStatus = "in_storage"
+    purchase_date: Optional[date] = None
+    warranty_until: Optional[date] = None
+    notes: str = ""
+
+
+class AssetUpdate(BaseModel):
+    """Zmiany w zasobie — wszystkie pola opcjonalne."""
+
+    assigned_to: Optional[str] = None
+    status: Optional[AssetStatus] = None
+    warranty_until: Optional[date] = None
+    notes: Optional[str] = None
+
+
+class AssetOut(BaseModel):
+    id: int
+    name: str
+    asset_type: AssetType
+    serial_number: str
+    assigned_to: Optional[str]
+    status: AssetStatus
+    purchase_date: Optional[date]
+    warranty_until: Optional[date]
+    notes: str
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+    @computed_field
+    @property
+    def warranty_days_left(self) -> Optional[int]:
+        """Ile dni gwarancji zostało; ujemne = już wygasła, None = brak danych."""
+        if self.warranty_until is None:
+            return None
+        return (self.warranty_until - date.today()).days
