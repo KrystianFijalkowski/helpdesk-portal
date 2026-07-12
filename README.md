@@ -27,7 +27,7 @@ Wewnętrzny portal działu IT — system obsługi zgłoszeń, ewidencja zasobów
 - [x] Etap 1 — backend: system ticketów (FastAPI)
 - [x] Etap 2 — frontend: React + Tailwind CSS
 - [x] Etap 3 — moduł zasobów IT (CMDB)
-- [ ] Etap 4 — konfiguracja serwera VPS (Linux, SSH)
+- [x] Etap 4 — konfiguracja serwera VPS (Oracle Cloud, Linux, SSH, firewall, fail2ban)
 - [ ] Etap 5 — monitoring na żywo
 - [ ] Etap 6 — raporty, baza wiedzy, szlif
 

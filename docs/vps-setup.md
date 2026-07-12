@@ -69,9 +69,41 @@ Wynik: zalogowany jako `ubuntu` na hoście `helpdesk-vps` (Ubuntu 24.04.4 LTS).
 Przy pierwszym połączeniu SSH zapisuje "odcisk palca" serwera do known_hosts —
 przy kolejnych połączeniach wykryje, gdyby ktoś podszywał się pod serwer.
 
-## 5. Zabezpieczenie serwera (następny krok)
+## 5. Zabezpieczenie serwera ✅
 
-- [ ] Aktualizacja systemu (`apt update && apt upgrade`)
-- [ ] Firewall (ufw): tylko porty 22 (SSH) i 8000 (API)
-- [ ] fail2ban — automatyczne banowanie prób włamań
-- [ ] Weryfikacja: logowanie hasłem wyłączone (tylko klucze SSH)
+- [x] Aktualizacja systemu
+- [x] Firewall: tylko porty 22 (SSH) i 8000 (API), reszta odrzucana
+- [x] fail2ban — automatyczne banowanie prób włamań (jail: sshd)
+- [x] Logowanie hasłem wyłączone (tylko klucze), logowanie na roota zablokowane
+- [x] Restart i weryfikacja, że wszystko przetrwało reboot
+
+### Wykonane komendy (z objaśnieniami)
+
+```bash
+# 1. Aktualizacja systemu — odpowiednik Windows Update
+sudo apt-get update && sudo apt-get upgrade -y
+
+# 2. fail2ban — czyta logi SSH i banuje IP po kilku nieudanych próbach logowania
+sudo apt-get install -y fail2ban
+sudo systemctl enable --now fail2ban
+sudo fail2ban-client status sshd     # podgląd: ilu zbanowanych
+
+# 3. Twardsze SSH: całkowity zakaz logowania na roota
+echo 'PermitRootLogin no' | sudo tee /etc/ssh/sshd_config.d/99-hardening.conf
+sudo systemctl restart ssh
+
+# 4. Firewall — obrazy Oracle mają fabrycznie iptables z regułą REJECT;
+#    dokładamy tylko port 8000 (API portalu) przed regułą odrzucającą
+sudo iptables -I INPUT 5 -m state --state NEW -p tcp --dport 8000 -j ACCEPT
+sudo netfilter-persistent save       # zapis reguł na stałe (przetrwają reboot)
+
+# 5. Restart (wymagany po aktualizacji jądra) i weryfikacja
+sudo reboot
+```
+
+Stan końcowy: `passwordauthentication no`, `permitrootlogin no`,
+firewall przepuszcza wyłącznie 22 i 8000, fail2ban aktywny.
+
+Uwaga na przyszłość (Etap 5): oprócz firewalla w systemie, port 8000 musi być
+też otwarty w **Security List / NSG** w konsoli Oracle (firewall na poziomie
+sieci chmurowej — dwie niezależne warstwy!).

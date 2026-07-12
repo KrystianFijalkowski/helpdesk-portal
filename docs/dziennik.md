@@ -109,3 +109,23 @@ Dokumentuję tu na bieżąco postępy prac, decyzje techniczne i rzeczy, któryc
 - CMDB (Configuration Management Database) = ewidencja zasobów IT z relacjami — kluczowe narzędzie działu IT
 - Refaktoryzacja bez zmiany zachowania: podział rosnącego kodu na `pages/` i współdzielone `components/`
 - Tabela HTML z klikalnymi wierszami jako wzorzec dla danych ewidencyjnych (karty lepsze dla ticketów, tabela dla inwentarza)
+
+---
+
+## 2026-07-12 — Etap 4: serwer VPS w Oracle Cloud ✅
+
+**Co zrobiłem:**
+- Wygenerowałem klucze SSH (ed25519) i założyłem konto Oracle Cloud Free Tier
+- Utworzyłem instancję `helpdesk-vps`: Ubuntu 24.04, VM.Standard.E2.1.Micro (Always Free), Frankfurt, nowy VCN z publicznym subnetem
+- Zdiagnozowałem i naprawiłem brak publicznego IP (quick action "Connect public subnet to internet" + ephemeral IP na VNIC)
+- Zalogowałem się kluczem SSH i zabezpieczyłem serwer: aktualizacja, fail2ban, PermitRootLogin no, firewall (tylko 22 i 8000)
+- Restart i weryfikacja, że cała konfiguracja przetrwała reboot
+
+Szczegóły krok po kroku: [vps-setup.md](vps-setup.md)
+
+**Czego się nauczyłem:**
+- SSH z kluczami: prywatny u mnie, publiczny na serwerze; hasła w ogóle wyłączone
+- Sieci w chmurze: VCN / subnet / Internet Gateway / VNIC / ephemeral IP
+- Firewall działa na dwóch warstwach: w systemie (iptables) i w chmurze (Security List/NSG) — obie muszą przepuścić ruch
+- fail2ban czyta logi i automatycznie banuje IP atakujących
+- Po aktualizacji jądra system prosi o reboot (`/var/run/reboot-required`) — a konfiguracja musi przetrwać restart (netfilter-persistent)
