@@ -54,3 +54,22 @@ Dokumentuję tu na bieżąco postępy prac, decyzje techniczne i rzeczy, któryc
 - `Literal["new", "in_progress", ...]` w Pydantic odrzuca nieprawidłowe wartości kodem 422, zanim dotkną bazy
 - Kody HTTP: 201 (utworzono), 404 (nie znaleziono), 422 (błędne dane)
 - PATCH z `exclude_unset=True` aktualizuje tylko przysłane pola
+
+---
+
+## 2026-07-12 — Etap 1 (koniec): komentarze i SLA ✅
+
+**Co zrobiłem:**
+- Tabela `comments` powiązana z ticketami przez klucz obcy (ForeignKey) + relacja w SQLAlchemy
+- Endpoint `POST /api/tickets/{id}/comments`; `GET /api/tickets/{id}` zwraca teraz ticket razem z komentarzami
+- SLA: pola `sla_deadline` i `sla_breached` liczone w locie z priorytetu (critical: 1h, high: 4h, medium: 8h, low: 24h)
+- Przetestowałem też API ręcznie w Swagger UI
+
+**Problemy i rozwiązania:**
+- Auto-reload uvicorna znowu się zawiesił (Windows + folder w OneDrive) → na razie po większych zmianach restartuję serwer ręcznie
+
+**Czego się nauczyłem:**
+- Klucz obcy (ForeignKey) wiąże wiersze dwóch tabel; `relationship` w SQLAlchemy pozwala pisać `ticket.comments` jak zwykłą listę
+- `cascade="all, delete-orphan"` — usunięcie ticketu automatycznie kasuje jego komentarze
+- `@computed_field` w Pydantic: pola wyliczane przy każdej odpowiedzi API, których nie ma w bazie — idealne na SLA
+- SLA (Service Level Agreement) = umowny maksymalny czas reakcji/rozwiązania zgłoszenia — kluczowe pojęcie w pracy helpdesku

@@ -13,7 +13,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="IT Helpdesk Portal API",
     description="Backend systemu obsługi zgłoszeń IT",
-    version="0.2.0",
+    version="0.3.0",
 )
 
 
@@ -49,13 +49,35 @@ def list_tickets(
     return query.all()
 
 
-@app.get("/api/tickets/{ticket_id}", response_model=schemas.TicketOut)
+@app.get("/api/tickets/{ticket_id}", response_model=schemas.TicketDetail)
 def get_ticket(ticket_id: int, db: Session = Depends(get_db)):
-    """Szczegóły jednego zgłoszenia."""
+    """Szczegóły jednego zgłoszenia razem z komentarzami."""
     ticket = db.get(models.Ticket, ticket_id)
     if ticket is None:
         raise HTTPException(status_code=404, detail="Zgłoszenie nie istnieje")
     return ticket
+
+
+@app.post(
+    "/api/tickets/{ticket_id}/comments",
+    response_model=schemas.CommentOut,
+    status_code=201,
+)
+def add_comment(
+    ticket_id: int,
+    data: schemas.CommentCreate,
+    db: Session = Depends(get_db),
+):
+    """Nowy komentarz pod zgłoszeniem — pisze technik albo pracownik."""
+    ticket = db.get(models.Ticket, ticket_id)
+    if ticket is None:
+        raise HTTPException(status_code=404, detail="Zgłoszenie nie istnieje")
+
+    comment = models.Comment(ticket_id=ticket_id, **data.model_dump())
+    db.add(comment)
+    db.commit()
+    db.refresh(comment)
+    return comment
 
 
 @app.patch("/api/tickets/{ticket_id}", response_model=schemas.TicketOut)

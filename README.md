@@ -24,7 +24,7 @@ Wewnętrzny portal działu IT — system obsługi zgłoszeń, ewidencja zasobów
 ## Status projektu
 
 - [x] Etap 0 — konfiguracja Gita i repozytorium
-- [ ] Etap 1 — backend: system ticketów (FastAPI)
+- [x] Etap 1 — backend: system ticketów (FastAPI)
 - [ ] Etap 2 — frontend: React
 - [ ] Etap 3 — moduł zasobów IT (CMDB)
 - [ ] Etap 4 — konfiguracja serwera VPS (Linux, SSH)
