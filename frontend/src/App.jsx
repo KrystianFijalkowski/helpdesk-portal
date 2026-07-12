@@ -3,6 +3,8 @@ import Sidebar from './components/Sidebar'
 import TicketsPage from './pages/TicketsPage'
 import AssetsPage from './pages/AssetsPage'
 import MonitoringPage from './pages/MonitoringPage'
+import ReportsPage from './pages/ReportsPage'
+import KbPage from './pages/KbPage'
 
 export default function App() {
   const [section, setSection] = useState('tickets')
@@ -15,6 +17,8 @@ export default function App() {
         {section === 'tickets' && <TicketsPage />}
         {section === 'assets' && <AssetsPage />}
         {section === 'monitoring' && <MonitoringPage />}
+        {section === 'reports' && <ReportsPage />}
+        {section === 'kb' && <KbPage />}
       </main>
     </div>
   )

@@ -59,6 +59,19 @@ class Asset(Base):
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 
+class KbArticle(Base):
+    """Artykuł bazy wiedzy — instrukcja rozwiązania typowego problemu."""
+
+    __tablename__ = "kb_articles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(200), nullable=False)
+    category = Column(String(30), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
+
+
 class MetricSample(Base):
     """Jedna próbka metryk z monitorowanego serwera (co ~30 s)."""
 

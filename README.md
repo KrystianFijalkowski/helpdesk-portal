@@ -29,7 +29,8 @@ Wewnętrzny portal działu IT — system obsługi zgłoszeń, ewidencja zasobów
 - [x] Etap 3 — moduł zasobów IT (CMDB)
 - [x] Etap 4 — konfiguracja serwera VPS (Oracle Cloud, Linux, SSH, firewall, fail2ban)
 - [x] Etap 5 — monitoring na żywo (agent na VPS + wykresy w portalu)
-- [ ] Etap 6 — raporty, baza wiedzy, szlif
+- [x] Etap 6 — raporty i baza wiedzy
+- [ ] Etap 7 — wdrożenie portalu na VPS (dostęp publiczny)
 
 ## Dokumentacja
 

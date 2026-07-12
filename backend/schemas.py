@@ -142,6 +142,26 @@ class AssetOut(BaseModel):
         return (self.warranty_until - date.today()).days
 
 
+# --- Baza wiedzy ---
+
+
+class KbArticleCreate(BaseModel):
+    title: str = Field(min_length=3, max_length=200)
+    category: Category
+    content: str = Field(min_length=10)
+
+
+class KbArticleOut(BaseModel):
+    id: int
+    title: str
+    category: Category
+    content: str
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
 # --- Monitoring ---
 
 

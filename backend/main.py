@@ -15,7 +15,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="IT Helpdesk Portal API",
     description="Backend systemu obsługi zgłoszeń IT",
-    version="0.5.0",
+    version="0.6.0",
 )
 
 
@@ -140,6 +140,93 @@ def update_asset(
     db.commit()
     db.refresh(asset)
     return asset
+
+
+# --- Baza wiedzy ---
+
+
+@app.post("/api/kb", response_model=schemas.KbArticleOut, status_code=201)
+def create_article(data: schemas.KbArticleCreate, db: Session = Depends(get_db)):
+    article = models.KbArticle(**data.model_dump())
+    db.add(article)
+    db.commit()
+    db.refresh(article)
+    return article
+
+
+@app.get("/api/kb", response_model=list[schemas.KbArticleOut])
+def list_articles(search: Optional[str] = None, db: Session = Depends(get_db)):
+    """Lista artykułów, opcjonalnie filtrowana po tytule/treści."""
+    query = db.query(models.KbArticle).order_by(models.KbArticle.created_at.desc())
+    if search:
+        pattern = f"%{search}%"
+        query = query.filter(
+            models.KbArticle.title.ilike(pattern)
+            | models.KbArticle.content.ilike(pattern)
+        )
+    return query.all()
+
+
+@app.get("/api/kb/{article_id}", response_model=schemas.KbArticleOut)
+def get_article(article_id: int, db: Session = Depends(get_db)):
+    article = db.get(models.KbArticle, article_id)
+    if article is None:
+        raise HTTPException(status_code=404, detail="Artykuł nie istnieje")
+    return article
+
+
+# --- Raporty ---
+
+
+@app.get("/api/reports/summary")
+def reports_summary(db: Session = Depends(get_db)):
+    """Statystyki zgłoszeń do modułu raportów."""
+    tickets = db.query(models.Ticket).all()
+
+    def count_by(field):
+        result = {}
+        for t in tickets:
+            key = getattr(t, field)
+            result[key] = result.get(key, 0) + 1
+        return result
+
+    # Czas rozwiązania liczymy z updated_at zgłoszeń zamkniętych/rozwiązanych —
+    # przybliżenie: ostatnia zmiana to zwykle moment rozwiązania
+    done = [t for t in tickets if t.status in ("resolved", "closed")]
+    avg_hours = None
+    if done:
+        total = sum((t.updated_at - t.created_at).total_seconds() for t in done)
+        avg_hours = round(total / len(done) / 3600, 1)
+
+    # Naruszenia SLA: otwarte po terminie + rozwiązane po terminie
+    breached = 0
+    now = datetime.utcnow()
+    for t in tickets:
+        deadline = t.created_at + timedelta(hours=schemas.SLA_HOURS[t.priority])
+        moment = t.updated_at if t.status in ("resolved", "closed") else now
+        if moment > deadline:
+            breached += 1
+
+    # Zgłoszenia z ostatnich 7 dni, pogrupowane po dniu
+    last7 = {}
+    for i in range(6, -1, -1):
+        day = (now - timedelta(days=i)).date()
+        last7[day.isoformat()] = 0
+    for t in tickets:
+        key = t.created_at.date().isoformat()
+        if key in last7:
+            last7[key] += 1
+
+    return {
+        "total": len(tickets),
+        "open": sum(1 for t in tickets if t.status in ("new", "in_progress")),
+        "avg_resolution_hours": avg_hours,
+        "sla_breached": breached,
+        "by_status": count_by("status"),
+        "by_category": count_by("category"),
+        "by_priority": count_by("priority"),
+        "last_7_days": last7,
+    }
 
 
 # --- Monitoring ---

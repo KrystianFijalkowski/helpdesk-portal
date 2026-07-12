@@ -152,3 +152,19 @@ Szczegóły krok po kroku: [vps-setup.md](vps-setup.md)
 - Wzorzec agent → poller → baza → dashboard, czyli jak działa monitoring infrastruktury
 - Wątek-daemon w Pythonie (`threading.Thread(daemon=True)`) do pracy w tle obok API
 - Wykres SVG od zera: skalowanie danych do współrzędnych, siatka, legenda, tooltip; paleta sprawdzona walidatorem dostępności (rozróżnialność dla daltonistów)
+
+---
+
+## 2026-07-12 — Etap 6: raporty i baza wiedzy ✅
+
+**Co zrobiłem:**
+- **Raporty** (`GET /api/reports/summary`): liczba zgłoszeń, otwarte, średni czas rozwiązania, naruszenia SLA (otwarte po terminie + rozwiązane po terminie), rozkład wg kategorii/statusu/priorytetu, nowe zgłoszenia dzień po dniu (7 dni)
+- **Baza wiedzy**: tabela `kb_articles` + CRUD z wyszukiwaniem (`ilike` po tytule i treści); 4 startowe artykuły (drukarka, reset hasła, dysk sieciowy, VPN)
+- Frontend: strona Raporty (kafelki + słupki kategorii + wykres 7 dni) i Baza wiedzy (wyszukiwarka z debounce, karty artykułów, widok artykułu, formularz publikacji)
+- Wszystkie 5 modułów w sidebarze aktywne — funkcje portalu ukończone
+
+**Czego się nauczyłem:**
+- Agregacje: grupowanie i liczenie rekordów pod raporty; średnia z różnic dat
+- `ilike` = wyszukiwanie bez rozróżniania wielkości liter
+- Debounce w React: `setTimeout` + `clearTimeout` w `useEffect`, żeby nie odpytywać API po każdej literze
+- Średni czas rozwiązania liczony z `updated_at` to **przybliżenie** — uczciwie odnotowane; docelowo ticket powinien mieć osobne pole `resolved_at`

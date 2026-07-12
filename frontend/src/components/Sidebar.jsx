@@ -2,7 +2,8 @@ const navItems = [
   { key: 'tickets', label: 'Zgłoszenia', icon: '🎫' },
   { key: 'assets', label: 'Zasoby IT', icon: '💻' },
   { key: 'monitoring', label: 'Monitoring', icon: '📡' },
-  { key: 'reports', label: 'Raporty', icon: '📊', soon: true },
+  { key: 'reports', label: 'Raporty', icon: '📊' },
+  { key: 'kb', label: 'Baza wiedzy', icon: '📚' },
 ]
 
 export default function Sidebar({ section, onNavigate }) {

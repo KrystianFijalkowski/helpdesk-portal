@@ -47,6 +47,23 @@ export function updateAsset(id, data) {
   return request(`/api/assets/${id}`, { method: 'PATCH', body: JSON.stringify(data) })
 }
 
+// --- Baza wiedzy ---
+
+export function fetchKbArticles(search) {
+  const query = search ? `?search=${encodeURIComponent(search)}` : ''
+  return request(`/api/kb${query}`)
+}
+
+export function createKbArticle(data) {
+  return request('/api/kb', { method: 'POST', body: JSON.stringify(data) })
+}
+
+// --- Raporty ---
+
+export function fetchReportsSummary() {
+  return request('/api/reports/summary')
+}
+
 // --- Monitoring ---
 
 export function fetchMonitoringStatus() {
