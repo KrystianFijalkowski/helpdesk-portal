@@ -6,8 +6,12 @@ import MonitoringPage from './pages/MonitoringPage'
 import ReportsPage from './pages/ReportsPage'
 import KbPage from './pages/KbPage'
 
+const SECTIONS = ['tickets', 'assets', 'monitoring', 'reports', 'kb']
+
 export default function App() {
-  const [section, setSection] = useState('tickets')
+  // Deep-linking: /?section=reports otwiera od razu wskazaną sekcję
+  const initial = new URLSearchParams(window.location.search).get('section')
+  const [section, setSection] = useState(SECTIONS.includes(initial) ? initial : 'tickets')
 
   return (
     <div className="flex min-h-screen">

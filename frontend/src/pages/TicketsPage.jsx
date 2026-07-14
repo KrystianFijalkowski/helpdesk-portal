@@ -7,8 +7,9 @@ import { STATUS } from '../labels'
 import { StatCard, FilterChip } from '../components/ui'
 
 export default function TicketsPage() {
-  // Widok: 'list' | 'new' | { detail: id }
-  const [view, setView] = useState('list')
+  // Widok: 'list' | 'new' | { detail: id }; /?ticket=7 otwiera od razu zgłoszenie
+  const initialTicket = new URLSearchParams(window.location.search).get('ticket')
+  const [view, setView] = useState(initialTicket ? { detail: Number(initialTicket) } : 'list')
   const [tickets, setTickets] = useState([])
   const [filter, setFilter] = useState('')
 
